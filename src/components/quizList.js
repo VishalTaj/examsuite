@@ -1,7 +1,8 @@
 import React from 'react';
-import firebase from '../config/firebase_config';
-import ListGroup from 'react-bootstrap/ListGroup'
-import Quiz from './quiz';
+import {Link} from 'react-router-dom';
+import ListGroup from 'react-bootstrap/ListGroup';
+import QuizService from '../services/quiz.services';
+import EsHeader from './shared/esheader';
 
 
 export default class QuizList extends React.Component {
@@ -13,42 +14,43 @@ export default class QuizList extends React.Component {
       exams: [],
       isReady: false
     }
-    this.fetchQuiz.bind(this);
     this.examList = this.examList.bind(this);
   }
 
-  db = firebase.firestore();
-
-  fetchQuiz = async () => {
-    const response = this.db.collection("/exams");
-    await response.get().then((snapshot) => {
-      snapshot.forEach((exam) => {
-        this.state.exams.push({id: exam.id, name: exam.get('Name'), icon: exam.get('Icon')});
-      });
-      this.setState({isReady: true});
-    })
-  }
-
   componentDidMount() {
-    this.fetchQuiz();
+    QuizService.getAll().then((data) => {
+      this.setState({exams: data, isReady: true});
+    });
   }
 
   examList() {
     if (this.state.isReady) {
       const { exams } = this.state;
-      return <div className="container">
-        <ListGroup>
-          { exams && exams.map((exam, index) => {
-            return <Quiz exam={ exam } key={exam.id} />
-          })}
-        </ListGroup>
-      </div>
+      return (
+        <div className="container">
+          
+          <ListGroup>
+            { exams && exams.map((exam, index) => {
+              return (
+                  <ListGroup.Item key={exam.id}>
+                    <Link to={`/quizes/${exam.id}`}>{exam.name}</Link>
+                  </ListGroup.Item>
+              )
+            })}
+          </ListGroup>
+        </div>
+      )
     } else {return null}
   }
 
 
   render() {
-    return(this.examList())
+    return(
+      <>
+        <EsHeader />
+        {this.examList()}
+      </>  
+    )
   }
 
 }

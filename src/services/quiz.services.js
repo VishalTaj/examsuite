@@ -1,23 +1,39 @@
-import firebase from '../config/firebase_config';
+import { db } from '../config/firebase_config';
 
-const db = firebase.firestore().collection("/exams");
+const collection = db.collection("/exams");
 
 class QuizService {
-  getAll() {
-    return db;
+  getAll = async () =>  {
+    var data = [];
+    await collection.get().then((snapshot) => {
+      snapshot.forEach((exam) => {
+        data.push({id: exam.id, name: exam.get('Name'), icon: exam.get('Icon')});
+      });
+    })
+    return data;
   }
 
-  create(tutorial) {
-    return db.add(tutorial);
+  questions = async (exam_id) => {
+    var questionsArr = [];
+    await collection.doc(exam_id).collection('/questions').get().then((snapshot) => {
+      snapshot.forEach((question) => {
+        questionsArr.push({id: question.id});
+      });
+    })
+    return questionsArr;
   }
 
-  update(id, value) {
-    return db.doc(id).update(value);
-  }
+  // create(tutorial) {
+  //   return db.add(tutorial);
+  // }
 
-  delete(id) {
-    return db.doc(id).delete();
-  }
+  // update(id, value) {
+  //   return db.doc(id).update(value);
+  // }
+
+  // delete(id) {
+  //   return db.doc(id).delete();
+  // }
 }
 
 export default new QuizService();
