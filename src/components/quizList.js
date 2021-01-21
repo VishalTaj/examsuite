@@ -27,13 +27,16 @@ export default class QuizList extends React.Component {
     if (this.state.isReady) {
       const { exams } = this.state;
       return (
-        <div className="container">
+        <div className="container" style={{marginTop: '20px'}}>
           
-          <ListGroup>
+          <ListGroup className="row">
             { exams && exams.map((exam, index) => {
               return (
-                  <ListGroup.Item key={exam.id}>
-                    <Link to={`/quizes/${exam.id}`}>{exam.name}</Link>
+                  <ListGroup.Item key={exam.id} className="col-md-3 text-center">
+                    <Link to={`/quizes/${exam.id}`}>
+                      <img src={exam.icon} alt={exam.name} className="img-thumbnail"/>
+                      {exam.name}
+                    </Link>
                   </ListGroup.Item>
               )
             })}

@@ -1,1 +1,14 @@
 
+body {background-color: beige;}
+
+.fullwidth {width: 100%;}
+
+.status-badges > span {
+  padding: 10px;
+  margin: 10px;
+  font-size: 13px;
+}
+
+.status-badges > span > span {
+  margin-left: 5px;
+}

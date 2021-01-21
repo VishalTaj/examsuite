@@ -1,6 +1,6 @@
 import React from 'react';
 
-class Erro404 extends React.Component {
+export default class Erro404 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,4 +14,3 @@ class Erro404 extends React.Component {
     )
    }
 }
-export default Erro404;

@@ -17,7 +17,8 @@ class QuizService {
     var questionsArr = [];
     await collection.doc(exam_id).collection('/questions').get().then((snapshot) => {
       snapshot.forEach((question) => {
-        questionsArr.push({id: question.id});
+        questionsArr.push({id: question.id, question: question.get('question'),answers: question.get('answers'), difficulty: question.get('difficulty'),
+      type: question.get('type') });
       });
     })
     return questionsArr;
