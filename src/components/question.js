@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
 import QuizService from '../services/quiz.services';
 import Answer from '../components/answer';
@@ -18,29 +18,48 @@ export default class Question extends Component {
       type: "single"
     }
 
+    this.answerRef = createRef();
+
     this.loadQuestions = this.loadQuestions.bind(this);
     this.nextPage = this.nextPage.bind(this);
+    this.checkAnswer = this.checkAnswer.bind(this);
   }
 
   componentDidMount() {
     this.loadQuestions();
   }
 
+  checkAnswer() {
+    let selected_answers = this.answerRef.current.querySelectorAll('input[name="answer"]:checked');
+    let isCorrect = false;
+    selected_answers.forEach((node, index) => {
+      isCorrect = node.getAttribute('data-result') === 'true' ? true : false
+    })
+    if (isCorrect) {
+      this.context.setState("correctAnswer", this.context.correctAnswer + 1)
+    } else {
+      this.context.setState("wrongAnswer", this.context.wrongAnswer + 1)
+    }
+  }
+
   nextPage() {
-    this.context.setState("currentIndex", this.context.currentIndex + 1);
-    this.setState({currentQuestion: this.state.questions[this.context.currentIndex]});
+    let currentIndex = this.context.currentIndex + 1;
+    this.checkAnswer();
+    this.context.setState("currentIndex", currentIndex);
+    this.context.setState("totalQuestion", this.context.totalQuestion + 1);
+    this.setState({currentQuestion: this.state.questions[currentIndex]});
   }
 
   loadQuestions() {
     if (localStorage.getItem('questions') === null) {
       QuizService.questions(this.state.exam_id).then((data) => {
-        this.setState({questions: data});
-        localStorage.setItem('questions', JSON.stringify(data));
-        this.setState({isReady: true, currentQuestion: this.state.questions[this.context.currentIndex]})
+        let questions = JSON.stringify(data);
+        this.setState({questions: data, isReady: true, currentQuestion: questions[this.context.currentIndex]});
+        localStorage.setItem('questions', questions);
       });
     } else {
-      this.setState({questions: JSON.parse(localStorage.getItem('questions'))});
-      this.setState({isReady: true, currentQuestion: this.state.questions[this.context.currentIndex]});
+      let questions = JSON.parse(localStorage.getItem('questions'));
+      this.setState({questions: questions, isReady: true, currentQuestion: questions[this.context.currentIndex]});
     }
     
   }
@@ -55,7 +74,7 @@ export default class Question extends Component {
             <Card.Header>Question no {this.context.currentIndex + 1}</Card.Header>
             <Card.Body>
               <Card.Title>{currentQuestion.question}</Card.Title>
-              <Card.Text>
+              <Card.Text ref={this.answerRef}>
                   {answers && answers.map((answer, index) => {
                     return <Answer key={index} answer={answer} />
                   })}
@@ -67,7 +86,7 @@ export default class Question extends Component {
           </Card>
         )
       } else {
-        return(<p>{this.context.currentIndex}</p>)
+        return(<p></p>)
       }
 
     } else {
@@ -92,7 +111,7 @@ export default class Question extends Component {
                     Wrong<Badge variant="light">{context.wrongAnswer}</Badge>
                   </Badge>
                   <Badge variant="primary">
-                    Total Question<Badge variant="light">{context.wrongAnswer}</Badge>
+                    Total Question<Badge variant="light">{context.totalQuestion}</Badge>
                   </Badge>
                 </div>
                 { this.renderQuestion() }
